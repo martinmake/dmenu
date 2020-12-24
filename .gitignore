@@ -1,0 +1,12 @@
+*.o
+
+compile_commands.json
+.clangd
+
+*.tar.gz
+
+*.orig
+*.rej
+
+dmenu
+stest
