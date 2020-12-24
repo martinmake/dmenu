@@ -29,7 +29,7 @@
 #define NUMBERSBUFSIZE        (NUMBERSMAXDIGITS * 2) + 1
 
 /* enums */
-enum { SchemeNorm, SchemeSel, SchemeOut, SchemeMid, SchemeNormHighlight, SchemeSelHighlight, SchemeOutHighlight, SchemeHp, SchemeLast }; /* color schemes */
+enum { Prompt, SchemeNorm, SchemeSel, SchemeOut, SchemeNormHighlight, SchemeSelHighlight, SchemeOutHighlight, SchemeHp, SchemeLast }; /* color schemes */
 
 
 struct item {
@@ -224,8 +224,6 @@ drawitem(struct item *item, int x, int y, int w)
 		drw_setscheme(drw, scheme[SchemeSel]);
 	else if (item->hp)
 		drw_setscheme(drw, scheme[SchemeHp]);
-	else if (item->left == sel || item->right == sel)
-		drw_setscheme(drw, scheme[SchemeMid]);
 	else if (issel(item->id))
 		drw_setscheme(drw, scheme[SchemeOut]);
 	else
@@ -264,7 +262,7 @@ drawmenu(void)
 
 	if (prompt && *prompt) {
 		if (colorprompt)
-			drw_setscheme(drw, scheme[SchemeSel]);
+			drw_setscheme(drw, scheme[Prompt]);
 		x = drw_text(drw, x, 0, promptw, bh, lrpad / 2, prompt, 0);
 	}
 	/* draw input field */
@@ -1182,11 +1180,17 @@ setup(void)
 	swa.background_pixel = scheme[SchemeNorm][ColBg].pixel;
 	swa.event_mask = ExposureMask | KeyPressMask | VisibilityChangeMask |
 	                 ButtonPressMask | PointerMotionMask;
-	win = XCreateWindow(dpy, parentwin, x, y, mw, mh, border_width,
-	                    CopyFromParent, CopyFromParent, CopyFromParent,
-	                    CWOverrideRedirect | CWBackPixel | CWEventMask, &swa);
+	/* custom offset for nicely fitting with polybar and bspwm */
+	if (lines)
+		win = XCreateWindow(dpy, parentwin, x + sides_lineoffset, y + top_lineoffset + sides_lineoffset, mw - 2*sides_lineoffset - 2*border_width, mh, border_width,
+		                    CopyFromParent, CopyFromParent, CopyFromParent,
+		                    CWOverrideRedirect | CWBackPixel | CWEventMask, &swa);
+	else
+		win = XCreateWindow(dpy, parentwin, x , y, mw - 2*border_width, mh, border_width,
+		                    CopyFromParent, CopyFromParent, CopyFromParent,
+		                    CWOverrideRedirect | CWBackPixel | CWEventMask, &swa);
 	if (border_width)
-		XSetWindowBorder(dpy, win, scheme[SchemeSel][ColBg].pixel);
+		XSetWindowBorder(dpy, win, scheme[SchemeSelHighlight][ColBg].pixel);
 	XSetClassHint(dpy, win, &ch);
 
 
